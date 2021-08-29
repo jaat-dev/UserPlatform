@@ -9,8 +9,8 @@ using UserPlatform.Domain;
 namespace UserPlatform.Domain.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210824043856_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210829051941_InitialDb")]
+    partial class InitialDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -146,25 +146,6 @@ namespace UserPlatform.Domain.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("UserPlatform.Domain.Entities.DocumentType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Description")
-                        .IsUnique();
-
-                    b.ToTable("DocumentTypes");
-                });
-
             modelBuilder.Entity("UserPlatform.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
@@ -173,21 +154,9 @@ namespace UserPlatform.Domain.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
-
-                    b.Property<string>("Document")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("DocumentTypeId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -239,9 +208,10 @@ namespace UserPlatform.Domain.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.Property<int>("UserType")
+                        .HasColumnType("INTEGER");
 
-                    b.HasIndex("DocumentTypeId");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -302,22 +272,6 @@ namespace UserPlatform.Domain.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("UserPlatform.Domain.Entities.User", b =>
-                {
-                    b.HasOne("UserPlatform.Domain.Entities.DocumentType", "DocumentType")
-                        .WithMany("Users")
-                        .HasForeignKey("DocumentTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DocumentType");
-                });
-
-            modelBuilder.Entity("UserPlatform.Domain.Entities.DocumentType", b =>
-                {
-                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

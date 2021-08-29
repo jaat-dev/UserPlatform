@@ -3,11 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserPlatform.API", "UserPlatform.API\UserPlatform.API.csproj", "{0A677CD0-CDFC-4326-AAFD-44B5455D577D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserPlatform.API", "UserPlatform.API\UserPlatform.API.csproj", "{0A677CD0-CDFC-4326-AAFD-44B5455D577D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserPlatform.Domain", "UserPlatform.Domain\UserPlatform.Domain.csproj", "{0C2AF482-1004-4F5A-ABFE-3471845F694A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserPlatform.Common", "UserPlatform.Common\UserPlatform.Common.csproj", "{889CD03D-88E6-4883-8D5E-DBD095E16D66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserPlatform.Domain", "UserPlatform.Domain\UserPlatform.Domain.csproj", "{0C2AF482-1004-4F5A-ABFE-3471845F694A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{0C2AF482-1004-4F5A-ABFE-3471845F694A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C2AF482-1004-4F5A-ABFE-3471845F694A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C2AF482-1004-4F5A-ABFE-3471845F694A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{889CD03D-88E6-4883-8D5E-DBD095E16D66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{889CD03D-88E6-4883-8D5E-DBD095E16D66}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{889CD03D-88E6-4883-8D5E-DBD095E16D66}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{889CD03D-88E6-4883-8D5E-DBD095E16D66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

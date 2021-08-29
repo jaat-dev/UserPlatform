@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using UserPlatform.Domain.Enums;
 
-namespace UserPlatform.Domain.Entities
+namespace UserPlatform.Domain.Models
 {
-    public class User : IdentityUser
+    public class UserViewModel
     {
+        public string Id { get; set; }
+
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        public string UserName { get; set; }
+
         [MaxLength(50, ErrorMessage = "El campo {0} no puede tener más de {1} carácteres.")]
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string FirstName { get; set; }
@@ -14,6 +18,11 @@ namespace UserPlatform.Domain.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public string LastName { get; set; }
 
-        public UserType UserType { get; set; }
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        public string UserType { get; set; }
+
     }
 }

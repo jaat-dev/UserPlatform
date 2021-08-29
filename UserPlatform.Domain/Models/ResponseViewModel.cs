@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UserPlatform.Common.Models
+namespace UserPlatform.Domain.Models
 {
     public class ResponseViewModel
     {
@@ -13,5 +13,7 @@ namespace UserPlatform.Common.Models
         public string Message { get; set; }
 
         public object Data { get; set; }
+
+        public bool IsException { get; set; } = false;
     }
 }

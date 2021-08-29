@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UserPlatform.Common\UserPlatform.Common.csproj" />
     <ProjectReference Include="..\UserPlatform.Domain\UserPlatform.Domain.csproj" />
   </ItemGroup>
 

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UserPlatform.API.Helpers.Interfaces;
-using UserPlatform.Common.Enums;
 using UserPlatform.Domain;
 using UserPlatform.Domain.Entities;
+using UserPlatform.Domain.Enums;
 
 namespace UserPlatform.API.Data
 {
@@ -22,21 +20,19 @@ namespace UserPlatform.API.Data
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
-            await CheckDocumentTypesAsync();
             await CheckRolesAsycn();
-            await CheckUserAsync("1010", "Luis", "Pérez", "luis@yopmail.com", "311 321 3624", "Calle 5ta Av 6ta", UserType.Administrador);
-            await CheckUserAsync("2020", "Juan", "López", "juan@yopmail.com", "311 322 3625", "Calle 5ta Av 7ta", UserType.Operativo);
-            await CheckUserAsync("3030", "Ana", "Correa", "ana@yopmail.com", "311 323 3626", "Calle 5ta Av 8ta", UserType.Operativo);
-            await CheckUserAsync("4040", "Maria", "Caro", "maria@yopmail.com", "311 324 3627", "Calle 5ta Av 9ta", UserType.Administrador);
+            await CheckUserAsync("jarevalo", "John", "Arévalo", "jarevalo@yopmail.com", UserType.Administrador);
+            await CheckUserAsync("lperez", "Luis", "Pérez", "lperez@yopmail.com", UserType.Operativo);
+            await CheckUserAsync("jlopez", "Juan", "López", "jlopez@yopmail.com", UserType.Operativo);
+            await CheckUserAsync("acorrea", "Ana", "Correa", "acorrea@yopmail.com", UserType.Operativo);
+            await CheckUserAsync("mcaro", "Maria", "Caro", "mcaro@yopmail.com", UserType.Administrador);
         }
 
         private async Task CheckUserAsync(
-            string document, 
-            string firstName, 
-            string lastName, 
-            string email, 
-            string phoneNumber, 
-            string address, 
+            string userName,
+            string firstName,
+            string lastName,
+            string email,
             UserType userType)
         {
             User user = await _userHelper.GetUserAsync(email);
@@ -44,14 +40,10 @@ namespace UserPlatform.API.Data
             {
                 user = new User
                 {
-                    Address = address,
-                    Document = document,
-                    DocumentType = _context.DocumentTypes.FirstOrDefault(x => x.Description == "Cédula"),
-                    Email = email,
+                    UserName = userName,
                     FirstName = firstName,
                     LastName = lastName,
-                    PhoneNumber = phoneNumber,
-                    UserName = email,
+                    Email = email,
                     UserType = userType
                 };
 
@@ -64,19 +56,6 @@ namespace UserPlatform.API.Data
         {
             await _userHelper.CheckRoleAsync(UserType.Administrador.ToString());
             await _userHelper.CheckRoleAsync(UserType.Operativo.ToString());
-        }
-
-        private async Task CheckDocumentTypesAsync()
-        {
-            if (!_context.DocumentTypes.Any())
-            {
-                _context.DocumentTypes.Add(new DocumentType { Description = "Tarjeta de Identidad" });
-                _context.DocumentTypes.Add(new DocumentType { Description = "Cédula de Ciudadanía" });
-                _context.DocumentTypes.Add(new DocumentType { Description = "Cédula de Extranjería" });
-                _context.DocumentTypes.Add(new DocumentType { Description = "Pasaporte" });
-                _context.DocumentTypes.Add(new DocumentType { Description = "NIT" });
-                await _context.SaveChangesAsync();
-            }
         }
     }
 }

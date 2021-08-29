@@ -1,16 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using UserPlatform.API.Helpers.Interfaces;
-using UserPlatform.API.Models;
-using UserPlatform.Common.Enums;
-using UserPlatform.Common.Models;
+using UserPlatform.API.Services.Interfaces;
 using UserPlatform.Domain.Entities;
+using UserPlatform.Domain.Enums;
+using UserPlatform.Domain.Models;
 
 namespace UserPlatform.API.Controllers
 {
@@ -18,224 +12,97 @@ namespace UserPlatform.API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUserHelper _userHelper;
-        private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
 
-        public UsersController(IUserHelper userHelper, IConfiguration configuration)
+        public UsersController(
+            IUserService userService)
         {
-            _userHelper = userHelper;
-            _configuration = configuration;
+            _userService = userService;
         }
 
-        [HttpPost]
-        [Route("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel request)
+        [HttpGet("/Users/GetAll")]
+        public async Task<ActionResult> GetUsers()
         {
-            if (!ModelState.IsValid)
+            ResponseViewModel result = await _userService.GetAll();
+            if (!result.IsSuccess)
             {
-                return BadRequest(new ResponseViewModel
-                {
-                    IsSuccess = false,
-                    Message = "Bad request",
-                    Data = ModelState
-                });
+                return result.IsException ?
+                    BadRequest(result.Message) : NotFound(result.Message);
             }
 
-            User user = await _userHelper.GetUserAsync(request.Username);
-            if (user == null)
-            {
-                return NotFound(new ResponseViewModel
-                {
-                    IsSuccess = false,
-                    Message = "User not exist"
-                });
-            }
-
-            Microsoft.AspNetCore.Identity.SignInResult result = await _userHelper.ValidatePasswordAsync(user, request.Password);
-            if (!result.Succeeded)
-            {
-                return BadRequest(new ResponseViewModel
-                {
-                    IsSuccess = false,
-                    Message = "User or password incorrect"
-                });
-            }
-
-            return Ok(new ResponseViewModel
-            {
-                IsSuccess = true,
-                Message = "Successful log-in",
-                //Data = GetToken(user)
-            });
-
+            return Ok(result.Data);
         }
 
-        //private object GetToken(User user)
-        //{
-        //    Claim[] claims = new[]
-        //    {
-        //        new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-        //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        //    };
-
-        //    SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
-        //    SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        //    JwtSecurityToken token = new JwtSecurityToken(
-        //        _configuration["Tokens:Issuer"],
-        //        _configuration["Tokens:Audience"],
-        //        claims,
-        //        expires: DateTime.UtcNow.AddDays(99),
-        //        signingCredentials: credentials);
-
-        //    return new
-        //    {
-        //        token = new JwtSecurityTokenHandler().WriteToken(token),
-        //        expiration = token.ValidTo,
-        //        user
-        //    };
-        //}
-
-
-        [HttpPost]
-        [Route("Register")]
-        public async Task<IActionResult> PostUser([FromBody] UserViewModel request)
+        [HttpGet("/Users/GetById/{id}")]
+        public async Task<ActionResult> GetUser(string id)
         {
-            if (!ModelState.IsValid)
+            ResponseViewModel result = await _userService.GetById(id);
+            if (!result.IsSuccess)
             {
-                return BadRequest(new ResponseViewModel
-                {
-                    IsSuccess = false,
-                    Message = "Bad request",
-                    Data = ModelState
-                });
+                return result.IsException ?
+                    BadRequest(result.Message) : NotFound(result.Message);
             }
 
-            User user = await _userHelper.GetUserAsync(request.Email);
-            if (user != null)
-            {
-                return BadRequest(new ResponseViewModel
-                {
-                    IsSuccess = false,
-                    Message = "User Exist"
-                });
-            }
-
-            user = new User
-            {
-                Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                UserName = request.Email,
-                UserType = UserType.Operativo
-            };
-
-            IdentityResult result = await _userHelper.AddUserAsync(user, request.Password);
-            if (result != IdentityResult.Success)
-            {
-                return BadRequest(new ResponseViewModel
-                {
-                    IsSuccess = false,
-                    Message = result.Errors.FirstOrDefault().Description
-                });
-            }
-
-            User userNew = await _userHelper.GetUserAsync(request.Email);
-            await _userHelper.AddUserToRoleAsync(userNew, user.UserType.ToString());
-
-            return Ok(new ResponseViewModel
-            {
-                IsSuccess = true,
-                Message = "User created",
-                Data = user
-            });
+            return Ok(result.Data);
         }
 
+        [HttpPost("/Users/Create")]
+        public async Task<ActionResult> PostUser(UserViewModelCreate model)
+        {
+            ResponseViewModel result = await _userService.Create(model);
+            if (!result.IsSuccess)
+            {
+                return result.IsException ?
+                    BadRequest(result.Message) : NotFound(result.Message);
+            }
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        //[HttpPut]
-        //[Route("Update")]
-        //public async Task<IActionResult> PutUser([FromBody] UserEditRequest request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(new ResponseViewModel
-        //        {
-        //            IsSuccess = false,
-        //            Message = "Bad request",
-        //            Data = ModelState
-        //        });
-        //    }
+            return Ok(result.Data);
+        }
 
-        //    string email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-        //    User user = await _userHelper.GetUserAsync(email);
-        //    if (user == null)
-        //    {
-        //        return BadRequest(new ResponseViewModel
-        //        {
-        //            IsSuccess = false,
-        //            Message = "User Does not exist"
-        //        });
-        //    }
+        [HttpPut("/Users/Update/{id}")]
+        public async Task<IActionResult> PutUser(UserViewModel model, string id)
+        {
+            ResponseViewModel result = await _userService.Update(id, model);
+            if (!result.IsSuccess)
+            {
+                return result.IsException ?
+                    BadRequest(result.Message) : NotFound(result.Message);
+            }
 
-        //    user.FirstName = request.FirstName;
-        //    user.LastName = request.LastName;
+            return Ok(result.Data);
+        }
 
-        //    IdentityResult result = await _userHelper.UpdateUserAsync(user);
-        //    if (!result.Succeeded)
-        //    {
-        //        return BadRequest(new ResponseViewModel
-        //        {
-        //            IsSuccess = false,
-        //            Message = result.Errors.FirstOrDefault().Description
-        //        });
-        //    }
+        [HttpDelete("/Users/DeleteTicket/{id}")]
+        public async Task<IActionResult> DeleteTicket(int id)
+        {
+            ResponseViewModel result = await _userService.Delete(id);
+            if (!result.IsSuccess)
+            {
+                return result.IsException ?
+                    BadRequest(result.Message) : NotFound(result.Message);
+            }
 
-        //    User updatedUser = await _userHelper.GetUserAsync(email);
-        //    return Ok(new ResponseViewModel
-        //    {
-        //        IsSuccess = true,
-        //        Message = "User updated",
-        //        Data = GetToken(updatedUser)
-        //    });
-        //}
+            return Ok(result.Message);
+        }
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        //[HttpPost]
-        //[Route("ChangePassword")]
-        //public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(new ResponseViewModel
-        //        {
-        //            IsSuccess = false,
-        //            Message = "Bad request",
-        //            Data = ModelState
-        //        });
-        //    }
+        [HttpDelete("/Users/Login}")]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            ResponseViewModel result = await _userService.LogIn(model);
+            if (!result.IsSuccess)
+            {
+                return result.IsException ?
+                    BadRequest(result.Message) : NotFound(result.Message);
+            }
 
-        //    string email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-        //    User user = await _userHelper.GetUserAsync(email);
-        //    if (user == null)
-        //    {
-        //        return NotFound(new Response
-        //        {
-        //            IsSuccess = false,
-        //            Message = "User Does not exist"
-        //        });
-        //    }
+            return Ok(result.Message);
+        }
 
-        //    IdentityResult result = await _userHelper.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
-        //    if (!result.Succeeded)
-        //    {
-        //        return BadRequest(new Response
-        //        {
-        //            IsSuccess = false,
-        //            Message = "Error changing password"
-        //        });
-        //    }
-
-        //    return Ok(new Response { IsSuccess = true, Message = "Password Changed Successfully" });
-        //}
+        [HttpDelete("/Users/Logout}")]
+        public async Task<IActionResult> Logout()
+        {
+            await _userService.LogOut();
+            return Ok();
+        }
     }
 }

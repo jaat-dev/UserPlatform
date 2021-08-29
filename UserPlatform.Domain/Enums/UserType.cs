@@ -1,4 +1,4 @@
-﻿namespace UserPlatform.Common.Enums
+﻿namespace UserPlatform.Domain.Enums
 {
     public enum UserType
     {
