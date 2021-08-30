@@ -29,19 +29,13 @@ namespace UserPlatform.API
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<User, IdentityRole>(x =>
-            {
-                x.User.RequireUniqueEmail = true;
-                x.Password.RequireDigit = false;
-                x.Password.RequiredUniqueChars = 0;
-                x.Password.RequireLowercase = false;
-                x.Password.RequireNonAlphanumeric = false;
-                x.Password.RequireUppercase = false;
-            })
-                .AddEntityFrameworkStores<DataContext>();
-
             services.AddDbContext<DataContext>(cfg =>
                 cfg.UseSqlite(Configuration.GetConnectionString("SQLiteConnection")));
+
+            services.AddIdentity<User, IdentityRole>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<DataContext>();
+
 
             services.AddAuthentication()
                 .AddCookie()

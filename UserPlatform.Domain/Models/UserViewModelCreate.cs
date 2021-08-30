@@ -1,12 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UserPlatform.Domain.Entities;
-using UserPlatform.Domain.Enums;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace UserPlatform.Domain.Models
 {

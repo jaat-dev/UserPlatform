@@ -61,15 +61,19 @@ namespace UserPlatform.API.Helpers
 
         public async Task<IdentityResult> UpdateUserAsync(User user)
         {
-            User currentUser = await GetUserAsync(user.Email);
-            currentUser.LastName = user.LastName;
+            //User currentUser = await _userManager.FindByIdAsync(user.Id);
+            User currentUser = await GetUserAsync(Guid.Parse(user.Id));
+            currentUser.UserName = user.UserName;
             currentUser.FirstName = user.FirstName;
+            currentUser.LastName = user.LastName;
+            currentUser.Email = user.Email;
+            currentUser.UserType = user.UserType;
             return await _userManager.UpdateAsync(currentUser);
         }
 
         public async Task<SignInResult> LoginAsync(LoginViewModel model)
         {
-            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
+            return await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
         }
 
         public async Task LogoutAsync()

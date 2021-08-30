@@ -8,9 +8,9 @@ namespace UserPlatform.API.Helpers
 {
     public class ConverterHelper : IConverterHelper
     {
-        public UserViewModel ToUserViewModel(User user)
+        public UserViewModel UserToUserViewModel(User user)
         {
-            return new UserViewModel
+            return new()
             {
                 Id = user.Id,
                 UserName = user.UserName,
@@ -21,21 +21,17 @@ namespace UserPlatform.API.Helpers
             };
         }
 
-        public User ToUser(UserViewModel model, bool isNew)
+        public User UserViewModelToUser(UserViewModel model, bool isNew)
         {
-            User user = new();
-            user.Id = model.Id;
-            user.UserName = model.UserName;
-            user.Email = model.Email;
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
-            user.UserType = (UserType)(model.UserType == "Administrador" ? 0 : 1);
-            if (isNew)
+            return new()
             {
-                user.Id = Guid.NewGuid().ToString();
-            }
-
-            return user;
+                Id = isNew ? Guid.NewGuid().ToString() : model.Id,
+                UserName = model.UserName,
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                UserType = (UserType)(model.UserType == "Administrador" ? 0 : 1)
+            };
         }
     }
 }

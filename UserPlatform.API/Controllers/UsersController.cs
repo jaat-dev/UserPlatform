@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using UserPlatform.API.Services.Interfaces;
-using UserPlatform.Domain.Entities;
-using UserPlatform.Domain.Enums;
 using UserPlatform.Domain.Models;
 
 namespace UserPlatform.API.Controllers
@@ -14,8 +13,7 @@ namespace UserPlatform.API.Controllers
     {
         private readonly IUserService _userService;
 
-        public UsersController(
-            IUserService userService)
+        public UsersController(IUserService userService)
         {
             _userService = userService;
         }
@@ -85,7 +83,7 @@ namespace UserPlatform.API.Controllers
             return Ok(result.Message);
         }
 
-        [HttpDelete("/Users/Login}")]
+        [HttpPost("/Users/LogIn")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             ResponseViewModel result = await _userService.LogIn(model);
@@ -95,14 +93,20 @@ namespace UserPlatform.API.Controllers
                     BadRequest(result.Message) : NotFound(result.Message);
             }
 
-            return Ok(result.Message);
+            return Ok(result.Data);
         }
 
-        [HttpDelete("/Users/Logout}")]
-        public async Task<IActionResult> Logout()
+        [HttpGet("/Users/LogOut")]
+        public async Task<ActionResult> LogOut()
         {
-            await _userService.LogOut();
-            return Ok();
+            ResponseViewModel result = await _userService.LogOut();
+            if (!result.IsSuccess)
+            {
+                return result.IsException ?
+                    BadRequest(result.Message) : NotFound(result.Message);
+            }
+
+            return Ok(result.Message);
         }
     }
 }

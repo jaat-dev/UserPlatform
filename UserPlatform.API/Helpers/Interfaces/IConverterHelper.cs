@@ -5,8 +5,9 @@ namespace UserPlatform.API.Helpers.Interfaces
 {
     public interface IConverterHelper
     {
-        UserViewModel ToUserViewModel(User user);
+        UserViewModel UserToUserViewModel(User user);
 
-        User ToUser(UserViewModel model, bool isNew);
+        User UserViewModelToUser(UserViewModel model, bool isNew);
+        //UserViewModel UserViewModelCreateToUserViewModel(UserViewModelCreate model);
     }
 }

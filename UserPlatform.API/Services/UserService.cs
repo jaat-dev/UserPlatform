@@ -47,7 +47,7 @@ namespace UserPlatform.API.Services
 
                 foreach (User user in users)
                 {
-                    listUserModel.Add(_converter.ToUserViewModel(user));
+                    listUserModel.Add(_converter.UserToUserViewModel(user));
                 }
 
                 return new ResponseViewModel { IsSuccess = true, Message = "Consulta Exitosa", Data = listUserModel };
@@ -66,17 +66,22 @@ namespace UserPlatform.API.Services
                 return new ResponseViewModel { IsSuccess = false, Message = "Usuarios no existe." };
             }
 
-            return new ResponseViewModel { IsSuccess = true, Message = "Consulta Exitosa", Data = _converter.ToUserViewModel(user) };
+            return new ResponseViewModel { IsSuccess = true, Message = "Consulta Exitosa", Data = _converter.UserToUserViewModel(user) };
         }
 
         public async Task<ResponseViewModel> Create(UserViewModelCreate model)
         {
             try
             {
-                User user = _converter.ToUser(model, true);
+                if (model.UserType != "Administrador" && model.UserType != "Operativo")
+                {
+                    return new ResponseViewModel { IsSuccess = false, Message = "El tipo de usuario no existe." };
+                }
+
+                User user = _converter.UserViewModelToUser(model, true);
                 await _userHelper.AddUserAsync(user, model.Password);
                 await _userHelper.AddUserToRoleAsync(user, user.UserType.ToString());
-                return new ResponseViewModel { IsSuccess = true, Message = "Usuario creado exitosamante.", Data = _converter.ToUserViewModel(user) };
+                return new ResponseViewModel { IsSuccess = true, Message = "Usuario creado exitosamante.", Data = _converter.UserToUserViewModel(user) };
             }
             catch (DbUpdateException updateEx)
             {
@@ -104,9 +109,9 @@ namespace UserPlatform.API.Services
 
             try
             {
-                User user = _converter.ToUser(model, true);
+                User user = _converter.UserViewModelToUser(model, false);
                 await _userHelper.UpdateUserAsync(user);
-                return new ResponseViewModel { IsSuccess = true, Message = "Registro modificado exitosamente.", Data = _converter.ToUserViewModel(user) };
+                return new ResponseViewModel { IsSuccess = true, Message = "Registro modificado exitosamente.", Data = _converter.UserToUserViewModel(user) };
             }
             catch (DbUpdateException updateEx)
             {
@@ -147,19 +152,27 @@ namespace UserPlatform.API.Services
 
         public async Task<ResponseViewModel> LogIn(LoginViewModel model)
         {
-            User user = await _userHelper.GetUserAsync(model.Username);
-            if (user == null)
+            try
             {
-                return new ResponseViewModel { IsSuccess = false, Message = "Usuarios no existe." };
-            }
+                User user = await _userHelper.GetUserAsync(model.Email);
+                if (user == null)
+                {
+                    return new ResponseViewModel { IsSuccess = false, Message = "Usuarios no existe." };
+                }
 
-            Microsoft.AspNetCore.Identity.SignInResult result = await _userHelper.LoginAsync(model);
-            if (!result.Succeeded)
+                model.Email = user.UserName;
+                Microsoft.AspNetCore.Identity.SignInResult result = await _userHelper.LoginAsync(model);
+                if (!result.Succeeded)
+                {
+                    return new ResponseViewModel { IsSuccess = false, Message = "Email o contraseña incorrectos." };
+                }
+
+                return new ResponseViewModel { IsSuccess = true, Message = "Successful log-in", Data = GetToken(user) };
+            }
+            catch (Exception ex)
             {
-                return new ResponseViewModel { IsSuccess = false, Message = "Email o contraseña incorrectos." };
+                return new ResponseViewModel { IsSuccess = false, Message = ex.Message, IsException = true };
             }
-
-            return new ResponseViewModel { IsSuccess = true, Message = "Successful log-in", Data = GetToken(user) };
         }
 
         private object GetToken(User user)
@@ -170,9 +183,9 @@ namespace UserPlatform.API.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
-            SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            JwtSecurityToken token = new JwtSecurityToken(
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
+            SigningCredentials credentials = new(key, SecurityAlgorithms.HmacSha256);
+            JwtSecurityToken token = new(
                 _configuration["Tokens:Issuer"],
                 _configuration["Tokens:Audience"],
                 claims,
@@ -187,9 +200,17 @@ namespace UserPlatform.API.Services
             };
         }
 
-        public async Task LogOut()
+        public async Task<ResponseViewModel> LogOut()
         {
-            await _userHelper.LogoutAsync();
+            try
+            {
+                await _userHelper.LogoutAsync();
+                return new ResponseViewModel { IsSuccess = true, Message = "Sesión cerrada exitosamente!" };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseViewModel { IsSuccess = false, Message = ex.Message, IsException = true };
+            }
         }
     }
 }

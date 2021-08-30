@@ -23,6 +23,5 @@ namespace UserPlatform.Domain.Models
         public string Email { get; set; }
 
         public string UserType { get; set; }
-
     }
 }
